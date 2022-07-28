@@ -13,7 +13,7 @@ COPY /src /src
 
 EXPOSE 3000
 RUN npm install mysql
-CMD dockerize -wait tcp://db:3306 -timeout 20s
+CMD dockerize -wait tcp://db:3306 -timeout 35s
 CMD ["node", "app.js" ]
 
 
