@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+
+  db:
+    image: mysql:8.0.15
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    container_name: mysql-app
+    environment:
+      MYSQL_ROOT_PASSWORD: 'docker'
+      MYSQL_DATABASE: 'docker_db'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: 'docker'
+    networks:
+      - app-network
+    ports:
+      - 3306:3306
+    # Change this to your local path
+    volumes:
+      - ./mysql/db:/var/lib/mysql
+
+  app:
+    build:
+      context: ./node
+      dockerfile: Dockerfile
+    image: jjbazagajr/node-app:latest
+    container_name: node-app
+    #entrypoint: dockerize -wait tcp://db:3306 -timeout 20s docker-entrypoint.sh
+    networks:
+      - app-network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  proxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx-proxy
+    image: jjbazagajr/nginx-proxy:latest
+    networks:
+      - app-network
+    ports:
+      - "8080:80"
+
+networks:
+  app-network:
+    driver: bridge
